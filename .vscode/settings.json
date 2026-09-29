@@ -1,3 +1,4 @@
 {
-    "dart.flutterSdkPath": "C:/Users/Zefrin/Desktop/Program/Flutter SDK/flutter"
+    "dart.flutterSdkPath": "C:/Users/Zefrin/Desktop/Program/Flutter SDK/flutter",
+    "java.compile.nullAnalysis.mode": "automatic"
 }
