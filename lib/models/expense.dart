@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 enum Category { food, travel, leisure, work, bills }
 
+const currencySymbol = '₱';
+
 const categoryIcons = {
   Category.food: Icons.restaurant,
   Category.travel: Icons.flight_takeoff,

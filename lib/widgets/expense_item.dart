@@ -21,7 +21,7 @@ class ExpenseItem extends StatelessWidget {
           '${categoryLabels[expense.category]}  •  ${expense.date.day}/${expense.date.month}/${expense.date.year}',
         ),
         trailing: Text(
-          'R ${expense.amount.toStringAsFixed(2)}',
+          '$currencySymbol ${expense.amount.toStringAsFixed(2)}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),

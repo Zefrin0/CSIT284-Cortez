@@ -106,7 +106,7 @@ class _NewExpenseState extends State<NewExpense> {
                   child: TextField(
                     controller: amountController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Amount', prefixText: 'R '),
+                    decoration: InputDecoration(labelText: 'Amount', prefixText: '$currencySymbol '),
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -153,7 +153,7 @@ class _Overview extends StatelessWidget {
                   Text('This month', style: TextStyle(color: scheme.onPrimary.withValues(alpha: .75))),
                   const SizedBox(height: 4),
                   Text(
-                    'R ${total.toStringAsFixed(2)}',
+                    '$currencySymbol ${total.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: scheme.onPrimary,
                           fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class _CategorySummary extends StatelessWidget {
                     SizedBox(
                       width: 70,
                       child: Text(
-                        'R ${categoryTotal.toStringAsFixed(0)}',
+                        '$currencySymbol ${categoryTotal.toStringAsFixed(0)}',
                         textAlign: TextAlign.end,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
