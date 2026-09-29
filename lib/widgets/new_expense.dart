@@ -112,7 +112,7 @@ class _NewExpenseState extends State<NewExpense> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<Category>(
-                    value: selectedCategory,
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: Category.values
                         .map(

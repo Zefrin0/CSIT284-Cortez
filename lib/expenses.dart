@@ -84,6 +84,7 @@ class _ExpensesState extends State<Expenses> {
           builder: (context, constraints) {
             final content = [
               _Overview(total: total, count: registeredExpenses.length),
+              _CategorySummary(expenses: registeredExpenses, total: total),
               const SizedBox(height: 10),
               if (registeredExpenses.isEmpty)
                 const _EmptyState()
@@ -191,6 +192,65 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 6),
           const Text('Tap "New expense" to capture your next spend.'),
         ],
+      ),
+    );
+  }
+}
+
+class _CategorySummary extends StatelessWidget {
+  const _CategorySummary({required this.expenses, required this.total});
+
+  final List<Expense> expenses;
+  final double total;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Spending by category', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 14),
+            ...Category.values.map((category) {
+              final categoryTotal = expenses
+                  .where((expense) => expense.category == category)
+                  .fold(0.0, (sum, expense) => sum + expense.amount);
+              final progress = total == 0 ? 0.0 : categoryTotal / total;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    Icon(categoryIcons[category], size: 18, color: scheme.primary),
+                    const SizedBox(width: 8),
+                    SizedBox(width: 62, child: Text(categoryLabels[category]!)),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 7,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 70,
+                      child: Text(
+                        'R ${categoryTotal.toStringAsFixed(0)}',
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

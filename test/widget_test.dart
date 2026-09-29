@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:expense_tracker/main.dart';
@@ -8,8 +9,12 @@ void main() {
 
     expect(find.text('Ledger & Lime'), findsOneWidget);
     expect(find.text('This month'), findsOneWidget);
+    expect(find.text('Spending by category'), findsOneWidget);
     expect(find.text('Coffee and toast'), findsOneWidget);
     expect(find.text('Monthly data'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
     expect(find.text('Weekend movie'), findsOneWidget);
   });
 
