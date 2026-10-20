@@ -18,7 +18,9 @@ void main() {
     expect(find.text('Weekend movie'), findsOneWidget);
   });
 
-  testWidgets('opens the new expense form and validates empty input', (tester) async {
+  testWidgets('opens the new expense form and validates empty input', (
+    tester,
+  ) async {
     await tester.pumpWidget(const ExpenseTrackerApp());
 
     await tester.tap(find.text('New expense'));
@@ -31,6 +33,58 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Almost there'), findsOneWidget);
-    expect(find.text('Add a title, a positive amount, and a date.'), findsOneWidget);
+    expect(
+      find.text('Add a title, a positive amount, and a date.'),
+      findsOneWidget,
+    );
   });
+
+  testWidgets(
+    'opens expense details and handles a result returned from the route',
+    (tester) async {
+      await tester.pumpWidget(const ExpenseTrackerApp());
+
+      await tester.tap(find.text('Coffee and toast'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expense details'), findsOneWidget);
+      expect(find.text('Food'), findsOneWidget);
+      await tester.tap(find.text('Mark as reviewed'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expense marked as reviewed.'), findsOneWidget);
+      expect(find.byTooltip('Reviewed'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'navigates to insights with expense data and applies theme settings',
+    (tester) async {
+      await tester.pumpWidget(const ExpenseTrackerApp());
+
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Spending insights'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Category breakdown'), findsOneWidget);
+      expect(find.text('₱ 498.49'), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<ThemeMode>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dark').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.dark,
+      );
+    },
+  );
 }

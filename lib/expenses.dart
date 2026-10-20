@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/screens/expense_details_screen.dart';
+import 'package:expense_tracker/widgets/app_routes.dart';
 import 'package:expense_tracker/widgets/expense_item.dart';
 import 'package:expense_tracker/widgets/new_expense.dart';
 
@@ -12,6 +14,8 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
+  final Set<String> reviewedExpenseIds = {};
+
   final List<Expense> registeredExpenses = [
     Expense(
       title: 'Coffee and toast',
@@ -33,7 +37,8 @@ class _ExpensesState extends State<Expenses> {
     ),
   ];
 
-  double get total => registeredExpenses.fold(0, (sum, item) => sum + item.amount);
+  double get total =>
+      registeredExpenses.fold(0, (sum, item) => sum + item.amount);
 
   void openAddExpense() {
     showModalBottomSheet<void>(
@@ -59,10 +64,34 @@ class _ExpensesState extends State<Expenses> {
         content: const Text('Expense removed.'),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () => setState(() => registeredExpenses.insert(index, expense)),
+          onPressed: () =>
+              setState(() => registeredExpenses.insert(index, expense)),
         ),
       ),
     );
+  }
+
+  Future<void> openInsights() {
+    return Navigator.of(context).pushNamed<void>(
+      AppRoutes.insights,
+      arguments: List<Expense>.unmodifiable(registeredExpenses),
+    );
+  }
+
+  Future<void> openExpense(Expense expense) async {
+    final reviewed = await Navigator.of(context).pushNamed<bool>(
+      AppRoutes.expenseDetails,
+      arguments: ExpenseDetailsArguments(
+        expense: expense,
+        reviewed: reviewedExpenseIds.contains(expense.id),
+      ),
+    );
+    if (reviewed == true && mounted) {
+      setState(() => reviewedExpenseIds.add(expense.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Expense marked as reviewed.')),
+      );
+    }
   }
 
   @override
@@ -78,6 +107,48 @@ class _ExpensesState extends State<Expenses> {
             icon: const Icon(Icons.add_circle_outline),
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    'Ledger & Lime',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.receipt_long_outlined),
+                title: const Text('Expense ledger'),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.insights_outlined),
+                title: const Text('Spending insights'),
+                onTap: () {
+                  Navigator.pop(context);
+                  openInsights();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('Settings'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.settings);
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -95,7 +166,10 @@ class _ExpensesState extends State<Expenses> {
                     direction: DismissDirection.endToStart,
                     onDismissed: (_) => removeExpense(expense),
                     background: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 24),
                       decoration: BoxDecoration(
@@ -107,18 +181,27 @@ class _ExpensesState extends State<Expenses> {
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
                     ),
-                    child: ExpenseItem(expense: expense),
+                    child: ExpenseItem(
+                      expense: expense,
+                      reviewed: reviewedExpenseIds.contains(expense.id),
+                      onTap: () => openExpense(expense),
+                    ),
                   ),
                 ),
             ];
+            final list = ListView.builder(
+              padding: const EdgeInsets.only(top: 12),
+              itemCount: content.length,
+              itemBuilder: (context, index) => content[index],
+            );
             return width > 720
                 ? Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 900),
-                      child: ListView(padding: const EdgeInsets.only(top: 12), children: content),
+                      child: list,
                     ),
                   )
-                : ListView(padding: const EdgeInsets.only(top: 12), children: content);
+                : list;
           },
         ),
       ),
@@ -150,14 +233,19 @@ class _Overview extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('This month', style: TextStyle(color: scheme.onPrimary.withValues(alpha: .75))),
+                  Text(
+                    'This month',
+                    style: TextStyle(
+                      color: scheme.onPrimary.withValues(alpha: .75),
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     '$currencySymbol ${total.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: scheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: scheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -167,7 +255,11 @@ class _Overview extends StatelessWidget {
               backgroundColor: scheme.onPrimary.withValues(alpha: .16),
               child: Text(
                 '$count',
-                style: TextStyle(color: scheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 20),
+                style: TextStyle(
+                  color: scheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
               ),
             ),
           ],
@@ -186,9 +278,16 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 80),
       child: Column(
         children: [
-          Icon(Icons.auto_awesome, size: 48, color: Theme.of(context).colorScheme.primary),
+          Icon(
+            Icons.auto_awesome,
+            size: 48,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(height: 16),
-          Text('Your ledger is clear', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Your ledger is clear',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 6),
           const Text('Tap "New expense" to capture your next spend.'),
         ],
@@ -212,7 +311,10 @@ class _CategorySummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Spending by category', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Spending by category',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 14),
             ...Category.values.map((category) {
               final categoryTotal = expenses
@@ -223,7 +325,11 @@ class _CategorySummary extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    Icon(categoryIcons[category], size: 18, color: scheme.primary),
+                    Icon(
+                      categoryIcons[category],
+                      size: 18,
+                      color: scheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     SizedBox(width: 62, child: Text(categoryLabels[category]!)),
                     Expanded(

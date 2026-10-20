@@ -21,12 +21,14 @@ const categoryLabels = {
 };
 
 class Expense {
+  static int _nextId = 0;
+
   Expense({
     required this.title,
     required this.amount,
     required this.date,
     required this.category,
-  }) : id = DateTime.now().microsecondsSinceEpoch.toString();
+  }) : id = '${DateTime.now().microsecondsSinceEpoch}-${_nextId++}';
 
   final String id;
   final String title;

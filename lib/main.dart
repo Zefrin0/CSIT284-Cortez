@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker/expenses.dart';
+import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/screens/expense_details_screen.dart';
+import 'package:expense_tracker/screens/insights_screen.dart';
+import 'package:expense_tracker/screens/settings_screen.dart';
+import 'package:expense_tracker/widgets/app_routes.dart';
 
 const seedColor = Color(0xFF2F6F64);
 
@@ -18,15 +23,22 @@ void main() {
   runApp(const ExpenseTrackerApp());
 }
 
-class ExpenseTrackerApp extends StatelessWidget {
+class ExpenseTrackerApp extends StatefulWidget {
   const ExpenseTrackerApp({super.key});
+
+  @override
+  State<ExpenseTrackerApp> createState() => _ExpenseTrackerAppState();
+}
+
+class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
+  ThemeMode _themeMode = ThemeMode.system;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Ledger & Lime',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
+      themeMode: _themeMode,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: lightColorScheme,
@@ -77,6 +89,42 @@ class ExpenseTrackerApp extends StatelessWidget {
         ),
       ),
       home: const Expenses(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case AppRoutes.insights:
+            final expenses = settings.arguments;
+            if (expenses is! List<Expense>) {
+              throw ArgumentError(
+                'Insights route requires a list of expenses.',
+              );
+            }
+            return MaterialPageRoute<void>(
+              builder: (_) => InsightsScreen(expenses: expenses),
+              settings: settings,
+            );
+          case AppRoutes.settings:
+            return MaterialPageRoute<void>(
+              builder: (_) => SettingsScreen(
+                themeMode: _themeMode,
+                onThemeModeChanged: (mode) => setState(() => _themeMode = mode),
+              ),
+              settings: settings,
+            );
+          case AppRoutes.expenseDetails:
+            final arguments = settings.arguments;
+            if (arguments is! ExpenseDetailsArguments) {
+              throw ArgumentError(
+                'Expense details route requires expense details arguments.',
+              );
+            }
+            return MaterialPageRoute<bool>(
+              builder: (_) => ExpenseDetailsScreen(arguments: arguments),
+              settings: settings,
+            );
+          default:
+            return null;
+        }
+      },
     );
   }
 }

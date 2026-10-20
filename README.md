@@ -15,7 +15,7 @@ samples, guidance on mobile development, and a full API reference.
 
 # Ledger & Lime
 
-An interactive Flutter expense tracker built for Lesson 5: Interactivity & Theming.
+An interactive Flutter expense tracker with a multi-screen navigation flow.
 
 ## Features
 
@@ -25,6 +25,10 @@ An interactive Flutter expense tracker built for Lesson 5: Interactivity & Themi
 - Swipe an item away and undo the deletion from the snackbar.
 - Responsive list layout for narrow and wide screens.
 - Custom light and dark Material 3 themes with a teal and lime-inspired palette.
+- Tap an expense to view its details and return a review result to the ledger.
+- Navigate to spending insights with a snapshot of the current expenses.
+- Open settings to switch between system, light, and dark themes.
+- Named routes keep the insights, settings, and expense-detail flows organized.
 
 ## Run locally
 
